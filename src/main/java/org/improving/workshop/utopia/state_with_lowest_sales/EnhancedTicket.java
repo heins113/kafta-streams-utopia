@@ -1,11 +1,11 @@
 package org.improving.workshop.utopia.state_with_lowest_sales;
 
-import org.improving.workshop.utopia.state_with_lowest_sales.TicketWithVenue;
+import org.improving.workshop.utopia.state_with_lowest_sales.TicketWithEvent;
 import org.improving.workshop.utopia.state_with_lowest_sales.VenueWithAddress;
 import java.io.Serializable;
 
-public record EnhancedTicket(String id, String customerid, String eventid, String venueid, String venue_name, String venue_line1, String venue_line2, String venue_citynm, String venue_state, String venue_zip5, String venue_zip4, String venue_countrycd, Integer capacity, String artist_id, Double price) implements Serializable {
-    public EnhancedTicket(String id, String customerid, String eventid, String venueid, String venue_name, String venue_line1, String venue_line2, String venue_citynm, String venue_state, String venue_zip5, String venue_zip4, String venue_countrycd, Integer capacity, String artist_id, Double price) {
+public record EnhancedTicket(String id, String customerid, String eventid, String venueid, String venue_name, String venue_line1, String venue_line2, String venue_citynm, String venue_state, String venue_zip5, String venue_zip4, String venue_countrycd, Integer event_capacity, Integer venue_capacity, String artist_id, Double price) implements Serializable {
+    public EnhancedTicket(String id, String customerid, String eventid, String venueid, String venue_name, String venue_line1, String venue_line2, String venue_citynm, String venue_state, String venue_zip5, String venue_zip4, String venue_countrycd, Integer event_capacity, Integer venue_capacity, String artist_id, Double price) {
         this.id = id;
         this.customerid = customerid;
         this.eventid = eventid;
@@ -18,12 +18,13 @@ public record EnhancedTicket(String id, String customerid, String eventid, Strin
         this.venue_zip5 = venue_zip5;
         this.venue_zip4 = venue_zip4;
         this.venue_countrycd = venue_countrycd;
-        this.capacity = capacity;
+        this.event_capacity = event_capacity;
+        this.venue_capacity = venue_capacity;
         this.artist_id = artist_id;
         this.price = price;
     }
 
-    public static EnhancedTicket CreateEnhancedTicket(TicketWithVenue ticket, VenueWithAddress venue) {
+    public static EnhancedTicket CreateEnhancedTicket(String key, TicketWithEvent ticket, VenueWithAddress venue) {
         return new EnhancedTicket(ticket.id(),
                                    ticket.customerid(),
                                    ticket.eventid(),
@@ -37,6 +38,7 @@ public record EnhancedTicket(String id, String customerid, String eventid, Strin
                                    venue.zip4(),
                                    venue.countrycd(),
                                    ticket.capacity(),
+                                   venue.maxcapacity(),
                                    ticket.artistid(),
                                    ticket.price());
     }
@@ -85,8 +87,12 @@ public record EnhancedTicket(String id, String customerid, String eventid, Strin
         return this.venue_countrycd;
     }
 
-    public Integer capacity() {
-        return this.capacity;
+    public Integer event_capacity() {
+        return this.event_capacity;
+    }
+
+    public Integer venue_capacity() {
+        return this.venue_capacity;
     }
 
     public String artist_id() {
