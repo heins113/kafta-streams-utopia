@@ -156,7 +156,7 @@ public class StateLowestTicketSold {
 
     }
 
-    public class EventTicketCounter {
+    public static class EventTicketCounter {
         private final Integer event_capacity;
         private Long tickets;
 
@@ -177,8 +177,7 @@ public class StateLowestTicketSold {
     // ASSUMPTION: all events for an artist are related to the same "tour"
     @Data
     @AllArgsConstructor
-//    public static class StateCounterMap {
-    public class StateCounterMap
+    public static class StateCounterMap
     {
         private int event_capacity;
         private LinkedHashMap<String, LinkedHashMap<String, EventTicketCounter>> map; // Key = state;  Value = map of counts of tickets indexed by event
