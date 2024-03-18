@@ -2,7 +2,6 @@ package org.improving.workshop.utopia.customers_attending_artist_events;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serdes;
@@ -15,9 +14,6 @@ import org.msse.demo.mockdata.music.event.Event;
 import org.msse.demo.mockdata.music.ticket.Ticket;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import static org.apache.kafka.streams.state.Stores.persistentKeyValueStore;
 import static org.improving.workshop.Streams.*;
 
@@ -27,8 +23,6 @@ public class CustomersAttendingArtistEvents {
 
     public static final JsonSerde<ArtistEvent> ARTIST_EVENT_JSON_SERDE = new JsonSerde<>(ArtistEvent.class);
     public static final JsonSerde<TicketEvent> TICKET_EVENT_JSON_SERDE = new JsonSerde<>(TicketEvent.class);
-    public static final JsonSerde<CustomerArtistEventCountMap> CUSTOMER_ARTIST_EVENT_COUNT_JSON_SERDE = new JsonSerde<>(CustomerArtistEventCountMap.class);
-    public static final JsonSerde<CustomerInfoArtistEventCount> CUSTOMER_INFO_ARTIST_EVENT_COUNT_JSON_SERDE = new JsonSerde<>(CustomerInfoArtistEventCount.class);
     public static final JsonSerde<CustomerInfoArtistInfoEventCount> CUSTOMER_INFO_ARTIST_INFO_EVENT_COUNT_JSON_SERDE = new JsonSerde<>(CustomerInfoArtistInfoEventCount.class);
 
     public static void main(final String[] args) {
@@ -90,29 +84,6 @@ public class CustomersAttendingArtistEvents {
                         (customerId, customer, customerArtistEventCount) -> new CustomerInfoArtistEventCount(customerArtistEventCount, customer)
                 )
                 .selectKey((customerId, customerInfoArtistEventCount) -> customerInfoArtistEventCount.customerArtistEventCount.artistId)
-                /* Needed to register the CustomerInfoArtistEventCount, only way to do so (for now) is to groupByKey and create
-                    a trivial aggregate where the in event is the same as the out event.
-                */
-                .groupByKey(Grouped.with(null, CUSTOMER_INFO_ARTIST_EVENT_COUNT_JSON_SERDE))
-                .aggregate(
-                        // initializer
-                        CustomerInfoArtistEventCount::new,
-
-                        // aggregator
-                        (customerId, eventIn, eventOut) -> {
-                            eventOut.setCustomer(eventIn.getCustomer());
-                            eventOut.setCustomerArtistEventCount(eventIn.getCustomerArtistEventCount());
-                            return eventOut;
-                        },
-
-                        // ktable (materialized) configuration
-                        Materialized
-                                .<String, CustomerInfoArtistEventCount>as(persistentKeyValueStore("ticket-event-counts-register-serde"))
-                                .withKeySerde(Serdes.String())
-                                .withValueSerde(CUSTOMER_INFO_ARTIST_EVENT_COUNT_JSON_SERDE)
-                )
-                .toStream()
-                /* End registration */
                 .join(
                         artistEventCountTable,
                         (artistId, customerInfoArtistEventCount, artistCount) -> new CustomerInfoArtistInfoEventCount(customerInfoArtistEventCount, artistCount))
@@ -124,7 +95,6 @@ public class CustomersAttendingArtistEvents {
 
     }
 
-    @Data
     @AllArgsConstructor
     @NoArgsConstructor
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
@@ -133,7 +103,6 @@ public class CustomersAttendingArtistEvents {
         private Event event;
     }
 
-    @Data
     @AllArgsConstructor
     @NoArgsConstructor
     @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
@@ -142,73 +111,25 @@ public class CustomersAttendingArtistEvents {
         private Event event;
     }
 
-    @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
-    public static class CustomerArtistEventCountMap {
-        private String customerId;
-
-        public HashMap<String, Long> eventCounterMap = new HashMap<>();
-
-        public void setCustomerId(String customerId) {
-            this.customerId = customerId;
-        }
-
-        public void setEventCounterMap(HashMap<String, Long> eventCounterMap) {
-            this.eventCounterMap = eventCounterMap;
-        }
-
-        public void incrementEventCounter(String artistId) {
-            if (eventCounterMap.containsKey(artistId)) {
-                eventCounterMap.merge(artistId, 1L, Long::sum);
-            } else {
-                eventCounterMap.put(artistId, 1L);
-            }
-        }
-
-        public void addNewEvent(String artistId, Long count) {
-            eventCounterMap.put(artistId, count);
-        }
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
     public static class CustomerArtistEventCount {
         public String customerId;
 
         public String artistId;
 
         public Long count;
-
-        public void setCustomerId(String customerId) {
-            this.customerId = customerId;
-        }
-
-        public void setArtistId(String artistId) {
-            this.artistId = artistId;
-        }
-
-        public void setCount(Long count) {
-            this.count = count;
-        }
     }
 
-    @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
     public static class CustomerInfoArtistEventCount {
         public Customer customer;
         public CustomerArtistEventCount customerArtistEventCount;
     }
 
-    @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "type")
     public static class CustomerInfoArtistInfoEventCount {
         public CustomerInfoArtistEventCount customerInfoArtistEventCount;
         public Long artistEventCount;

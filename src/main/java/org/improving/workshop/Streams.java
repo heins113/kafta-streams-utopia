@@ -15,6 +15,7 @@ import org.msse.demo.mockdata.music.event.Event;
 import org.msse.demo.mockdata.music.stream.Stream;
 import org.msse.demo.mockdata.music.ticket.Ticket;
 import org.msse.demo.mockdata.music.venue.Venue;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerde;
 
 import java.util.Properties;
@@ -64,6 +65,7 @@ public class Streams {
         // against which the application is run.
         streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-workshop-example-" + UUID.randomUUID());
         streamsConfiguration.put(StreamsConfig.CLIENT_ID_CONFIG, "kafka-workshop-client");
+        streamsConfiguration.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
         // Where to find Kafka broker(s).
         // LOCAL
