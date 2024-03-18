@@ -69,55 +69,28 @@ public class CustomersAttendingArtistEvents {
                         .count();
         artistEventCountTable.toStream().peek((artistId, count) -> log.info("[COUNT] Artist '{}' has had {} total events", artistId, count));
 
-        KTable<String, CustomerArtistEventCountMap> customerArtistEventCountTable =
+        KTable<String, Long> customerArtistEventCountTable =
                 builder.stream(TOPIC_DATA_DEMO_TICKETS, Consumed.with(Serdes.String(), Streams.SERDE_TICKET_JSON))
                         .peek((ticketId, ticket) -> log.info("Ticket Requested: {}", ticket))
                         .selectKey((ticketId, ticket) -> ticket.eventid())
                         .join(
                                 event_table,
                                 (eventId, ticket, event) -> new TicketEvent(ticket, event))
-                        .selectKey((ticketId, ticketEvent) -> ticketEvent.ticket.customerid())
+                        .selectKey((ticketId, ticketEvent) -> ticketEvent.ticket.customerid() + "#" + ticketEvent.event.artistid())
                         .groupByKey(Grouped.with(null, TICKET_EVENT_JSON_SERDE))
-                        .aggregate(
-                                // initializer
-                                CustomerArtistEventCountMap::new,
-
-                                // aggregator
-                                (customerId, ticketEvent, customerArtistEventCountMap) -> {
-                                    customerArtistEventCountMap.setCustomerId(customerId);
-                                    customerArtistEventCountMap.incrementEventCounter(ticketEvent.event.artistid());
-                                    return customerArtistEventCountMap;
-                                },
-
-                                // ktable (materialized) configuration
-                                Materialized
-                                        .<String, CustomerArtistEventCountMap>as(persistentKeyValueStore("ticket-event-counts"))
-                                        .withKeySerde(Serdes.String())
-                                        .withValueSerde(CUSTOMER_ARTIST_EVENT_COUNT_JSON_SERDE)
-                        );
+                        .count();
 
         customerArtistEventCountTable.toStream()
-                .flatMapValues((customerId, customerArtistEventCountMap) -> {
-                    ArrayList<CustomerArtistEventCount> customerArtistArrayList = new ArrayList();
-
-                    for (HashMap.Entry<String, Long> artistCount : customerArtistEventCountMap.eventCounterMap.entrySet()) {
-                        CustomerArtistEventCount customerArtistEvent = new CustomerArtistEventCount();
-                        customerArtistEvent.setCustomerId(customerId);
-                        customerArtistEvent.setArtistId(artistCount.getKey());
-                        customerArtistEvent.setCount(artistCount.getValue());
-
-                        customerArtistArrayList.add(customerArtistEvent);
-                    }
-                    return customerArtistArrayList;
-                })
-                .peek((customerId, customerArtistEventCount) -> log.info("[COUNT] Customer '{}' has seen '{}' {} times ", customerId, customerArtistEventCount.artistId, customerArtistEventCount.count))
+                .mapValues((customerArtistId, customerArtistEventCount) -> new CustomerArtistEventCount(customerArtistId.split("#")[0], customerArtistId.split("#")[1], customerArtistEventCount))
+                .selectKey((customerArtistId, customerArtistEventCount) -> customerArtistId.split("#")[0])
+                .peek((customerArtistId, customerArtistEventCount) ->  log.info("[COUNT] Customer '{}' has seen '{}' '{}' times", customerArtistId, customerArtistEventCount.artistId, customerArtistEventCount.count))
                 .join(
                         global_customer_table,
                         (customerId, customer) -> customerId,
                         (customerId, customer, customerArtistEventCount) -> new CustomerInfoArtistEventCount(customerArtistEventCount, customer)
                 )
                 .selectKey((customerId, customerInfoArtistEventCount) -> customerInfoArtistEventCount.customerArtistEventCount.artistId)
-                /* Needed to register the CustomerInfoArtistEventCount, only way to do so (for now) is to groubByKey and create
+                /* Needed to register the CustomerInfoArtistEventCount, only way to do so (for now) is to groupByKey and create
                     a trivial aggregate where the in event is the same as the out event.
                 */
                 .groupByKey(Grouped.with(null, CUSTOMER_INFO_ARTIST_EVENT_COUNT_JSON_SERDE))
