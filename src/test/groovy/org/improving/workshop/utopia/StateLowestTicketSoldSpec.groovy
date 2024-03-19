@@ -14,6 +14,7 @@ import spock.lang.Specification
 
 import static org.improving.workshop.utils.DataFaker.EVENTS
 import static org.improving.workshop.utils.DataFaker.TICKETS
+import static org.improving.workshop.utils.DataFaker.EVENTS_FIXED_CAPACITY
 
 class StateLowestTicketSoldSpec extends Specification {
     TopologyTestDriver driver
@@ -98,10 +99,10 @@ class StateLowestTicketSoldSpec extends Specification {
         ])
 
         and: 'piping events through the stream'
-        def event1_artist1 = EVENTS.generate("event-1", "artist-1", "mn-venue-1", 10)
-        def event2_artist1 = EVENTS.generate("event-2", "artist-1", "mn-venue-1", 10)
-        def event3_artist1 = EVENTS.generate("event-3", "artist-1", "wi-venue-1", 10)
-        def event4_artist2 = EVENTS.generate("event-4", "artist-1", "ia-venue-1", 10)
+        def event1_artist1 = EVENTS_FIXED_CAPACITY.generate("event-1", "artist-1", "mn-venue-1", 10)
+        def event2_artist1 = EVENTS_FIXED_CAPACITY.generate("event-2", "artist-1", "mn-venue-1", 10)
+        def event3_artist1 = EVENTS_FIXED_CAPACITY.generate("event-3", "artist-1", "wi-venue-1", 10)
+        def event4_artist2 = EVENTS_FIXED_CAPACITY.generate("event-4", "artist-1", "ia-venue-1", 10)
         eventInputTopic.pipeKeyValueList([
                 new KeyValue<String, Stream>(event1_artist1.id(), event1_artist1),
                 new KeyValue<String, Stream>(event2_artist1.id(), event2_artist1),
