@@ -161,8 +161,11 @@ public class StateLowestTicketSold {
     @Data
     @AllArgsConstructor
     public static class EventTicketCounter {
-        private final Integer event_capacity;
+        private Integer event_capacity;
         private Long tickets;
+
+        public EventTicketCounter() {
+        }
 
         public EventTicketCounter(Integer event_capacity) {
             this.event_capacity = event_capacity;
