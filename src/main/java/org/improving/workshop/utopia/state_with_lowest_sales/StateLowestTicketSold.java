@@ -149,8 +149,10 @@ public class StateLowestTicketSold {
                               .withValueSerde(STATE_COUNTER_MAP_JSON_SERDE)
                               )
                 .toStream()
-                .mapValues(sortedCounterMap -> sortedCounterMap.states_with_worst_sales(NUMBER_OF_STATES))
-                .peek((event_id, state_counter_map) -> log.info("The bottom {} state(s) with the fewest sold ticket for event {} are: {}", NUMBER_OF_STATES, event_id, state_counter_map))
+                .peek((artist_id, state_counter_map) -> log.info("Before Aggregate: {}", state_counter_map))
+                .mapValues(state_counter_map -> state_counter_map.states_with_worst_sales(NUMBER_OF_STATES))
+                .peek((artist_id, state_counter_map) -> log.info("After Aggregate: {}", state_counter_map))
+//                .peek((artist_id, state_counter_map) -> log.info("The bottom {} state(s) with the fewest sold ticket for event {} are: {}", NUMBER_OF_STATES, artist_id, state_counter_map))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), PERCENT_HASH_MAP_JSON_SERDE));
         // </editor-fold>
 
@@ -179,7 +181,6 @@ public class StateLowestTicketSold {
     @AllArgsConstructor
     public static class StateCounterMap
     {
-        private int event_capacity;
         private LinkedHashMap<String, LinkedHashMap<String, EventTicketCounter>> map; // Key = state;  Value = map of counts of tickets indexed by event
 
         public StateCounterMap() {
@@ -205,6 +206,8 @@ public class StateLowestTicketSold {
                 event_ticket_counter = new EventTicketCounter(enhanced_ticket.event_capacity());
             }
             event_ticket_counter.increment_ticket();
+//            event_ticket_map.put(event_id, event_ticket_counter);     // TODO: How to add data
+            map.put(state, event_ticket_map);
         }
 
         public HashMap<String, Double> states_with_worst_sales(int limit)

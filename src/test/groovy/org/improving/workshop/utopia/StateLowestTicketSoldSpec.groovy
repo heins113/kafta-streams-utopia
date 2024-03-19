@@ -98,10 +98,10 @@ class StateLowestTicketSoldSpec extends Specification {
         ])
 
         and: 'piping events through the stream'
-        def event1_artist1 = EVENTS.generate("event-1", "artist-1", "mn-address-1", 10)
-        def event2_artist1 = EVENTS.generate("event-2", "artist-1", "mn-address-1", 10)
-        def event3_artist1 = EVENTS.generate("event-3", "artist-1", "wi-address-1", 10)
-        def event4_artist2 = EVENTS.generate("event-4", "artist-1", "ia-address-1", 10)
+        def event1_artist1 = EVENTS.generate("event-1", "artist-1", "mn-venue-1", 10)
+        def event2_artist1 = EVENTS.generate("event-2", "artist-1", "mn-venue-1", 10)
+        def event3_artist1 = EVENTS.generate("event-3", "artist-1", "wi-venue-1", 10)
+        def event4_artist2 = EVENTS.generate("event-4", "artist-1", "ia-venue-1", 10)
         eventInputTopic.pipeKeyValueList([
                 new KeyValue<String, Stream>(event1_artist1.id(), event1_artist1),
                 new KeyValue<String, Stream>(event2_artist1.id(), event2_artist1),
@@ -141,7 +141,7 @@ class StateLowestTicketSoldSpec extends Specification {
         def outputRecords = outputTopic.readRecordsToList()
 
         then: 'records received'
-        outputRecords.size() == 10
+        outputRecords.size() == 12
 
         and: 'Bottom 2 states with the fewest sales'
         def bottom_2 = outputTopic.readRecordsToList().last()
