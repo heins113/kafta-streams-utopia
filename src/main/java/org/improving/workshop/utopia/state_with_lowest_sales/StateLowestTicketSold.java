@@ -229,6 +229,7 @@ public class StateLowestTicketSold {
                 }
                 state_percent_sold_map.put(state_entry.getKey(), (percent_sold_sum / state_entry.getValue().size()));
             }
+
             return state_percent_sold_map.entrySet()
                                          .stream()
                                          .sorted(Map.Entry.comparingByValue())

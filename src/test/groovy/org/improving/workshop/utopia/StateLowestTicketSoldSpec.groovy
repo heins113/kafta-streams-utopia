@@ -145,14 +145,14 @@ class StateLowestTicketSoldSpec extends Specification {
         outputRecords.size() == 12
 
         and: 'Bottom 2 states with the fewest sales'
-        def bottom_2 = outputTopic.readRecordsToList().last()
+        def bottom_2 = outputRecords.last()
 
         // record is for customer 1
-        bottom_2.key() == "1"
+        bottom_2.key() == "artist-1"
         // artist 3 is back into the top 3!
         bottom_2.value() == [
-                "4": 3L,
-                "2": 2L
+                "IA": (double)0.2,
+                "WI": (double)0.3
         ]
 
     }
