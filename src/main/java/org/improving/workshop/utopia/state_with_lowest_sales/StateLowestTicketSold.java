@@ -158,6 +158,8 @@ public class StateLowestTicketSold {
 
     }
 
+    @Data
+    @AllArgsConstructor
     public static class EventTicketCounter {
         private final Integer event_capacity;
         private Long tickets;
@@ -206,7 +208,7 @@ public class StateLowestTicketSold {
                 event_ticket_counter = new EventTicketCounter(enhanced_ticket.event_capacity());
             }
             event_ticket_counter.increment_ticket();
-//            event_ticket_map.put(event_id, event_ticket_counter);     // TODO: How to add data
+            event_ticket_map.put(event_id, event_ticket_counter);     // TODO: How to add data
             map.put(state, event_ticket_map);
         }
 
