@@ -1,6 +1,7 @@
 package org.improving.workshop.utils
 
 import net.datafaker.Faker
+import org.improving.workshop.service.EventFixedCapacityFaker
 import org.msse.demo.mockdata.customer.address.AddressFaker
 import org.msse.demo.mockdata.customer.email.EmailFaker
 import org.msse.demo.mockdata.customer.phone.PhoneFaker
@@ -19,6 +20,7 @@ class DataFaker {
     public static def CUSTOMERS = new CustomerFaker(FAKER, ADDRESSES, EMAILS, PHONES)
     public static def EMAILS = new EmailFaker(FAKER)
     public static def EVENTS = new EventFaker(FAKER)
+    public static def EVENTS_FIXED_CAPACITY = new EventFixedCapacityFaker(FAKER)
     public static def PHONES = new PhoneFaker(FAKER)
     public static def STREAMS = new StreamFaker(FAKER)
     public static def TICKETS = new TicketFaker(FAKER)
