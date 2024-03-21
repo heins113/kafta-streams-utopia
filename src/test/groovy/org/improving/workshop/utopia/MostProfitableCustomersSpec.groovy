@@ -7,6 +7,7 @@ import org.apache.kafka.streams.TestInputTopic
 import org.apache.kafka.streams.TestOutputTopic
 import org.apache.kafka.streams.TopologyTestDriver
 import org.improving.workshop.Streams
+import org.improving.workshop.utopia.profitable_customers.MostProfitableCustomers
 import org.msse.demo.mockdata.customer.profile.Customer
 import org.msse.demo.mockdata.music.stream.Stream
 import spock.lang.Specification

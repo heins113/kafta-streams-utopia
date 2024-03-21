@@ -1,4 +1,4 @@
-package org.improving.workshop.utopia;
+package org.improving.workshop.utopia.profitable_customers;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
