@@ -132,7 +132,7 @@ class CustomersAttendingArtistEventsSpec extends Specification {
         when: 'reading the output records'
         def outputRecords = outputTopic.readRecordsToList()
 
-        then: '4 records were received'
+        then: '3 records were received'
         outputRecords.size() == 3
 
         and: 'customer-1 has seen 2 out of 3 events for artist 1'
