@@ -137,20 +137,20 @@ class CustomersAttendingArtistEventsSpec extends Specification {
 
         and: 'customer-1 has seen 2 out of 3 events for artist 1'
         outputRecords.get(0).value().customerInfoArtistEventCount.customer.id == "customer-1"
-        outputRecords.get(0).value().customerInfoArtistEventCount.customerArtistEventCount.artistId == "artist-1"
-        outputRecords.get(0).value().customerInfoArtistEventCount.customerArtistEventCount.count == 2L
+        outputRecords.get(0).value().customerInfoArtistEventCount.artistId == "artist-1"
+        outputRecords.get(0).value().customerInfoArtistEventCount.count == 2L
         outputRecords.get(0).value().artistEventCount == 3L
 
         and: 'customer-1 has seen 1 out of 1 events for artist 2'
         outputRecords.get(1).value().customerInfoArtistEventCount.customer.id == "customer-1"
-        outputRecords.get(1).value().customerInfoArtistEventCount.customerArtistEventCount.artistId == "artist-2"
-        outputRecords.get(1).value().customerInfoArtistEventCount.customerArtistEventCount.count == 1L
+        outputRecords.get(1).value().customerInfoArtistEventCount.artistId == "artist-2"
+        outputRecords.get(1).value().customerInfoArtistEventCount.count == 1L
         outputRecords.get(1).value().artistEventCount == 1L
 
         and: 'customer-2 has seen 1 out of 1 events for artist 2'
         outputRecords.get(2).value().customerInfoArtistEventCount.customer.id == "customer-2"
-        outputRecords.get(2).value().customerInfoArtistEventCount.customerArtistEventCount.artistId == "artist-2"
-        outputRecords.get(2).value().customerInfoArtistEventCount.customerArtistEventCount.count == 1L
+        outputRecords.get(2).value().customerInfoArtistEventCount.artistId == "artist-2"
+        outputRecords.get(2).value().customerInfoArtistEventCount.count == 1L
         outputRecords.get(2).value().artistEventCount == 1L
 
     }

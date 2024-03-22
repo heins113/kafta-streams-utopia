@@ -75,20 +75,20 @@ public class CustomersAttendingArtistEvents {
                         .count();
 
         customerArtistEventCountTable.toStream()
-                .mapValues((customerArtistId, customerArtistEventCount) -> new CustomerArtistEventCount(customerArtistId.split("#")[0], customerArtistId.split("#")[1], customerArtistEventCount))
+                .mapValues((customerArtistId, customerArtistEventCount) -> new CustomerArtistEventCount(customerArtistId.split("#")[1], customerArtistEventCount))
                 .selectKey((customerArtistId, customerArtistEventCount) -> customerArtistId.split("#")[0])
                 .peek((customerArtistId, customerArtistEventCount) ->  log.info("[COUNT] Customer '{}' has seen '{}' '{}' times", customerArtistId, customerArtistEventCount.artistId, customerArtistEventCount.count))
                 .join(
                         global_customer_table,
                         (customerId, customer) -> customerId,
-                        (customerId, customer, customerArtistEventCount) -> new CustomerInfoArtistEventCount(customerArtistEventCount, customer)
+                        (customerId, customerArtistEventCount, customer) -> new CustomerInfoArtistEventCount(customer, customerArtistEventCount.artistId, customerArtistEventCount.count)
                 )
-                .selectKey((customerId, customerInfoArtistEventCount) -> customerInfoArtistEventCount.customerArtistEventCount.artistId)
+                .selectKey((customerId, customerInfoArtistEventCount) -> customerInfoArtistEventCount.artistId)
                 .join(
                         artistEventCountTable,
                         (artistId, customerInfoArtistEventCount, artistCount) -> new CustomerInfoArtistInfoEventCount(customerInfoArtistEventCount, artistCount))
                 .filter((artistId, customerInfoArtistInfoEventCount) ->
-                     ((float) customerInfoArtistInfoEventCount.customerInfoArtistEventCount.customerArtistEventCount.count / customerInfoArtistInfoEventCount.artistEventCount) >= 0.5
+                     ((float) customerInfoArtistInfoEventCount.customerInfoArtistEventCount.count / customerInfoArtistInfoEventCount.artistEventCount) >= 0.5
                 )
                 .peek((artistId, customerInfoArtistInfoEventCount) -> log.info("[OUTPUT] Customer '{}' has seen more than 50% of '{}' shows", customerInfoArtistInfoEventCount.customerInfoArtistEventCount.customer.id(), artistId))
                 .to(OUTPUT_TOPIC, Produced.with(Serdes.String(), CUSTOMER_INFO_ARTIST_INFO_EVENT_COUNT_JSON_SERDE));
@@ -114,8 +114,6 @@ public class CustomersAttendingArtistEvents {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class CustomerArtistEventCount {
-        public String customerId;
-
         public String artistId;
 
         public Long count;
@@ -125,7 +123,10 @@ public class CustomersAttendingArtistEvents {
     @NoArgsConstructor
     public static class CustomerInfoArtistEventCount {
         public Customer customer;
-        public CustomerArtistEventCount customerArtistEventCount;
+
+        public String artistId;
+
+        public Long count;
     }
 
     @AllArgsConstructor
