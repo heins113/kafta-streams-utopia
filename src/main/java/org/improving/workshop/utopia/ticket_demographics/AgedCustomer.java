@@ -24,7 +24,7 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
         int age = -1;
         try {
             Year current_year = Year.now(Clock.systemUTC());
-            String birth_year = customer.birthdt().split("/")[2];
+            String birth_year = customer.birthdt().split("-")[0];
             int birth_year_value = Integer.parseInt(birth_year);
             if (birth_year.length() == 4)
             {
