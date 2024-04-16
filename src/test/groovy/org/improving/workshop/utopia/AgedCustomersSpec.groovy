@@ -71,11 +71,17 @@ class AgedCustomersSpec extends Specification {
 
         and: 'customer-1 has seen 2 out of 3 events for artist 1'
         outputRecords.get(0).value().age() == 65
+        outputRecords.get(0).value().ageRange() == "Old"
         outputRecords.get(1).value().age() == 66
+        outputRecords.get(1).value().ageRange() == "Old"
         outputRecords.get(2).value().age() == 31
+        outputRecords.get(2).value().ageRange() == "Middle"
         outputRecords.get(3).value().age() == 30
+        outputRecords.get(3).value().ageRange() == "Middle"
         outputRecords.get(4).value().age() == 29
+        outputRecords.get(4).value().ageRange() == "Young"
         outputRecords.get(5).value().age() == 24
+        outputRecords.get(5).value().ageRange() == "Young"
 
     }
 }

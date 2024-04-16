@@ -4,8 +4,8 @@ import org.msse.demo.mockdata.customer.profile.Customer;
 import java.io.Serializable;
 import java.time.*;
 
-public record AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age) implements Serializable {
-    public AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age) {
+public record AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange) implements Serializable {
+    public AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange) {
         this.id = id;
         this.type = type;
         this.gender = gender;
@@ -18,10 +18,12 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
         this.birthdt = birthdt;
         this.joindt = joindt;
         this.age = age;
+        this.ageRange = ageRange;
     }
 
     public static AgedCustomer CreateAgedCustomer(Customer customer) {
         int age = -1;
+        String ageRange = "None";
         try {
             Year current_year = Year.now(Clock.systemUTC());
             String birth_year = customer.birthdt().split("-")[0];
@@ -29,6 +31,13 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
             if (birth_year.length() == 4)
             {
                 age = current_year.getValue() - birth_year_value;
+                if (age < 30){
+                    ageRange = "Young";
+                } else if (age >= 30 && age <65) {
+                    ageRange = "Middle";
+                } else {
+                    ageRange = "Old";
+                }
             }
         }
         catch (Exception ignored) {
@@ -45,7 +54,8 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
                 customer.title(),
                 customer.birthdt(),
                 customer.joindt(),
-                age);
+                age,
+                ageRange);
     }
 
     public String id() {
