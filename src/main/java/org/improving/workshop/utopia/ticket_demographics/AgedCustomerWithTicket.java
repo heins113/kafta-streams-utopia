@@ -1,11 +1,14 @@
 package org.improving.workshop.utopia.ticket_demographics;
 
 import org.msse.demo.mockdata.customer.profile.Customer;
-import java.io.Serializable;
-import java.time.*;
 
-public record AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange) implements Serializable {
-    public AgedCustomer(String id, String type, String gender, String fname, String mname, String lname, String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange) {
+import java.time.Clock;
+import java.time.Year;
+
+public record AgedCustomerWithTicket(String id, String type, String gender, String fname, String mname, String lname,
+                                     String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange, String ticketId, String eventid, Double price, String genre) {
+    public AgedCustomerWithTicket(String id, String type, String gender, String fname, String mname, String lname,
+                                  String fullname, String suffix, String title, String birthdt, String joindt, int age, String ageRange, String ticketId, String eventid, Double price, String genre) {
         this.id = id;
         this.type = type;
         this.gender = gender;
@@ -19,29 +22,14 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
         this.joindt = joindt;
         this.age = age;
         this.ageRange = ageRange;
+        this.ticketId = ticketId;
+        this.eventid = eventid;
+        this.price = price;
+        this.genre = genre;
     }
 
-    public static AgedCustomer CreateAgedCustomer(Customer customer) {
-        int age = -1;
-        String ageRange = "None";
-        try {
-            Year current_year = Year.now(Clock.systemUTC());
-            String birth_year = customer.birthdt().split("-")[0];
-            int birth_year_value = Integer.parseInt(birth_year);
-            if (birth_year.length() == 4) {
-                age = current_year.getValue() - birth_year_value;
-                if (age < 30) {
-                    ageRange = "Young";
-                } else if (age >= 30 && age < 65) {
-                    ageRange = "Middle";
-                } else {
-                    ageRange = "Old";
-                }
-            }
-        } catch (Exception ignored) {
-        }
-
-        return new AgedCustomer(customer.id(),
+    public static AgedCustomerWithTicket CreateAgedCustomerWithTicket(AgedCustomer customer, AgedCustomerWithTicketStream.TicketGenre ticketGenre) {
+        return new AgedCustomerWithTicket(customer.id(),
                 customer.type(),
                 customer.gender(),
                 customer.fname(),
@@ -52,8 +40,12 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
                 customer.title(),
                 customer.birthdt(),
                 customer.joindt(),
-                age,
-                ageRange);
+                customer.age(),
+                customer.ageRange(),
+                ticketGenre.id,
+                ticketGenre.eventid,
+                ticketGenre.price,
+                ticketGenre.genre);
     }
 
     public String id() {
@@ -103,9 +95,4 @@ public record AgedCustomer(String id, String type, String gender, String fname, 
     public int age() {
         return this.age;
     }
-
-    public String ageRange() {
-        return this.ageRange;
-    }
 }
-
